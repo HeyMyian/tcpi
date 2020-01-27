@@ -25,12 +25,12 @@
 ; 		Main > Settings > Chat > Log to file
 ;
 ; 		1. Add only your channel to the list of channels to be logged
-;			2. Select a folder where the log files should be saved
-;			3. In the column for "Message Types", at least "Chat Info" needs to be selected
-;			4. Unselect everything else if you don't need chat logs otherwise and want the most lightweight script
-;			5. Recommended Split Logs: Daily
-;			6. Uncheck "Lock files", otherwise AHK can't read the file
-;			7. Timestamp: [2020-01-26 13:56:33]
+;		2. Select a folder where the log files should be saved
+;		3. In the column for "Message Types", at least "Chat Info" needs to be selected
+;		4. Unselect everything else if you don't need chat logs otherwise and want the most lightweight script
+;		5. Recommended Split Logs: Daily
+;		6. Uncheck "Lock files", otherwise AHK can't read the file
+;		7. Timestamp: [2020-01-26 13:56:33]
 ;
 ;
 ; 3) Variables ------------------------------------------------------------------------------------------------------------------
