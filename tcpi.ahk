@@ -2,9 +2,9 @@
 ;
 ; Script Name:		Twitch Channel Points Integration (tcpi)
 ; Description:		Redeeming Channel Points on Twitch sends key input to your game, broadcasting software, or plays a sound file
-; Filename:			tcpi.ahk
-; Script Version:	v0.3
-; Modified:			2020-01-26
+; Filename:			tcpiv05.ahk
+; Script Version:	v0.5
+; Modified:			2020-02-01
 ; AHK Version:		v1.1.24.01 - August 2, 2016
 ; Author:			Myian <heymyian@gmail.com> <https://twitch.tv/myian>
 ;
@@ -15,7 +15,7 @@
 ; 1) AutoHotkey -----------------------------------------------------------------------------------------------------------------
 ;
 ; 		Download AutoHotkey here: https://www.autohotkey.com/ and install.
-; 		Run this script as administrator by double-clicking on the file. It's now in your system tray.
+; 		Run this script as administrator. It's now in your system tray.
 ;
 ;
 ; 2) Chatty ---------------------------------------------------------------------------------------------------------------------
@@ -40,48 +40,68 @@
 		logfolder 		:= "O:\Stream\logs"				; The folder where your log files are stored. Last modified file is used
 		soundfolder 	:= "O:\Stream\soundbits"		; The folder where your sound files are stored
 		game 			:= "PlanetSide2_x64.exe"		; Your game's exe file
-		obs				:= "obs64.exe"					; Your broadcasting software exe file (only tested with OBS)
-		checktime 		:= 100			; Time in milliseconds until the log file is checked for changes again
+		checktime 		:= 200			; Time in milliseconds until the log file is checked for changes again
 										; The script only ever reads the last log line, so keep this number fairly low
-		activategame	:= 1			; 1 allows the script to focus your game when the redemption happens. 0 disables this
+										; For this reason, there also is no "reward action queue"
 ;
 ;
-; 4) Twitch Redemptions ---------------------------------------------------------------------------------------------------------
+; 4) Twitch rewards ---------------------------------------------------------------------------------------------------------
 ;
-;		name:		Name of your Redemption as it appears in Twitch
+;		name:		"string"
+;					Name of your reward as it appears in Twitch
 
-;		sound:		Name of the sound file you want to be played
+;		type:		game | "sound" | "hotkey"
+;
+;					game
+;					Reward's actions will only trigger while the game is active to prevent unwanted keyboard input
+;					It's a variable. Set your game's exe under point 3)
+;					Reward's sound will always trigger
+;
+;					"sound"
+;					Reward is only a sound. Will always trigger
+;
+;					"hotkey"
+;					Reward's actions and sound will always trigger, meant for broadcasting software hotkeys
+;					The according hotkeys have to be set up in your broadcasting software as well
 
-;		app:		game | obs
-;					If a redemption should happen in the game or in your broadcasting software
-;					The according hotkeys have to be set up in the broadcsting software as well
+;		sound:		"string"
+;					Name of the sound file you want to be played
+;					In some cases, the sound file will not play no matter what. Try saving the file at lower bitrate
+;					There is no volume control per sound file. Sounds tend to come out too loud
+;					Either save the sound file at the according volume, or lower the ahk output volume in Windows Volume Mixer
 
-;		actions:	Actions to be performed, in the order given
+;		actions:	"{AHK key}" | "Sleep, duration"
+;					Actions to be performed, in the order given
 ;					List of Keys: https://www.autohotkey.com/docs/KeyList.htm
+;					Modifier keys (^ Ctrl, ! Alt, + Shift) seem to not work right, so send the actual keys individually instead
 ;					If a game does not accept a sequence of keys, a short 50ms Sleep between key presses might do the trick
-;
-; 		The weird line breaks are on purpose. Don't change unless you know what you are doing
-;
-		redemptions 
-			:= [{ 	 name: "PS2 Integration :: Granada"
-					,sound: "granada.mp3"
-					,app: game
-					,actions :[ "{MButton down}", "{MButton up}" ] }
-						
-			, { 	 name: "PS2 Integration :: Use Tool"
-					,sound: "boing.mp3"
-					,app: game
-					,actions :[ "{3 down}", "{3 up}", "Sleep, 1500", "{LButton down}", "{LButton up}" ] }
-						
-			, { 	 name: "Stream Integration :: Sad"
-					,sound: "sad2.mp3"
-					,app: obs
-					,actions :[ "^!{k}"	] }
 
-			, { 	 name: "PS2 Integration :: v6"
-					,sound: "ding.mp3"
-					,app: game
-					,actions :[ "{v down}", "{v up}", "Sleep, 100", "{6 down}", "{6 up}" ] } ]
+
+rewards := []
+
+; Example reward with sound file and key input in a game (Space bar)
+rewards[0,"name"]	:= "Reward Name"
+rewards[0,"type"]	:= game
+rewards[0,"sound"]	:= "yoursoundfile.mp3"
+rewards[0,"actions"]:= [ "{Space}" ]
+
+; Example reward with sound file
+rewards[1,"name"]	:= "Sound Reward"
+rewards[1,"type"]	:= "sound"
+rewards[1,"sound"]	:= "boing.mp3"
+
+; Example reward with multiple key input in a game (v, short pause, 4)
+rewards[2,"name"]	:= "Another Reward"
+rewards[2,"type"]	:= game
+rewards[2,"actions"]:= [ "{v}", "Sleep, 50", "{4}" ]
+
+; Example reward triggers a sound and a hotkey meant for your broadcasting software
+rewards[3,"name"]	:= "Hotkey Reward"
+rewards[3,"type"]	:= "hotkey"
+rewards[3,"sound"]	:= "yoursoundfile.mp3"
+rewards[3,"actions"]:= [ "{Alt down}", "Sleep, 50", "{Numpad7 down}", "Sleep, 50", "{Alt up}", "Sleep, 50", "{Numpad7 up}" ]
+
+; add more rewards by copying one of the above and increasing the number
 
 
 ; ===============================================================================================================================
@@ -92,6 +112,7 @@
 ;
 ; ===============================================================================================================================
 ; ===============================================================================================================================
+
 
 #Persistent
 #SingleInstance Force
@@ -116,7 +137,6 @@ Return
 
 ; the thing
 checkfile:
-
 	; get file size again, stored in different variable
 	FileGetSize, filesize2, %logfile%
 	
@@ -124,7 +144,7 @@ checkfile:
 	If(filesize1 != filesize2) {
 	
 		filesize1 := filesize2
-	
+
 		; get last line
 		Loop, read, %logfile% 
 		{
@@ -132,74 +152,41 @@ checkfile:
 		}
 		
 		; change this line if you use a different timestamp format or a different chat logger altogether
-		; this checks if the 23rd chracter on the last line is an opening bracket. look at your log file to understand why
+		; this checks if the 23rd chracter is an opening bracket. look at your chatlog file to understand why
 		If (SubStr(lastline,23,1)="[") {
 
-			; cycle through each redemption in the array
-			For Each, redemption in redemptions {
-
-				; do the thing where the redemption name matches the last line
-				If (InStr(lastline, redemption.name)) {
+			; cycle through each reward in the array
+			For Each, reward in rewards {
+			
+				; do the thing where the reward name matches the last line
+				If (InStr(lastline, reward.name)) {
+				
+					; in case a sound file is specified, play that.
+					If (reward.sound!="") {
+						SoundPlay, % soundfolder . "\" . reward.sound
+					}
 				
 					; in case there are actions specified
-					If (redemption.actions!="") {
+					If (reward.actions!="") {
 					
-						; in case you allow the script to bring the game to front
-						If (activategame=1) {
-
-							; if tabbed out of the game
-							If (redemption.app=game)&&(!WinActive("ahk_exe" . game)) {
+						; game must be focused, or it's a hotkey for broadcasting software
+						If ((reward.type=game)&&(WinActive("ahk_exe" . game)) or (reward.type="hotkey")) {
+					
+							; cycle through the actions
+							For Each, action in reward.actions {
 							
-								; bring game to front
-								WinActivate, ahk_exe %game%
+								; sleep between keys, sometimes important for applications to pick up input
+								If InStr(action,"Sleep,") {
+									el_sleep := StrSplit(action, ",")
+									Sleep, el_sleep[2]
+								}
 								
-								; and center the mouse cursor
-								WinGetPos,,, width, height, A
-								center_x := width/2
-								center_y := height/2
-								MouseMove, center_x, center_y
-								
-								; Workaround for activating mouse clicks in PS2
-								If (game="PlanetSide2_x64.exe") { 
-									Send {Alt}
+								; keypress
+								Else {											
+									SendInput, % action
 								}
 							}
 						}
-						
-						; cycle through the actions
-						For Each, action in redemption.actions {
-							
-							; keypress
-							If InStr(action,"{") {
-							
-								; keypress in game, assuming game is focused
-								; if game is not focused, and you don't want this script to focus the game,
-								; try analogous the below ControlSend
-								; ControlSend doesn't work in every application
-								If (redemption.app=game) {
-									SendInput, %action%
-								}
-								
-								; keypress in broadcasting software
-								; using ControlSend to send keys to background program
-								If (redemption.app=obs) {
-									ControlSend,, %action%, ahk_exe %obs%
-								}
-							}
-							
-							; sleep between keys, sometimes important for applications to pick up input
-							Else If InStr(action,"Sleep,") {
-								el_sleep := StrSplit(action, ", ")
-								Sleep, el_sleep[2]
-							}
-						}
-					}
-					
-					; in case a sound file is specified, play that.
-					; there is no volume control per file. sounds tend to come out too loud
-					; either lower the ahk volume in Windows, or save the sound files at the correct volume
-					If (redemption.sound!="") {
-						SoundPlay, % soundfolder . "\" . redemption.sound
 					}
 				}
 			}				
