@@ -2,7 +2,7 @@
 ;
 ; Script Name:		Twitch Channel Points Integration (tcpi)
 ; Description:		Redeeming Channel Points on Twitch sends key input to your game, broadcasting software, or plays a sound file
-; Filename:			tcpiv05.ahk
+; Filename:			tcpi.ahk
 ; Script Version:	v0.5
 ; Modified:			2020-02-01
 ; AHK Version:		v1.1.24.01 - August 2, 2016
