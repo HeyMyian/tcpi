@@ -40,41 +40,40 @@
 		logfolder 		:= "O:\Stream\logs"				; The folder where your log files are stored. Last modified file is used
 		soundfolder 	:= "O:\Stream\soundbits"		; The folder where your sound files are stored
 		game 			:= "PlanetSide2_x64.exe"		; Your game's exe file
+		
 		checktime 		:= 200			; Time in milliseconds until the log file is checked for changes again
 										; The script only ever reads the last log line, so keep this number fairly low
 										; For this reason, there also is no "reward action queue"
 ;
 ;
-; 4) Twitch rewards ---------------------------------------------------------------------------------------------------------
+; 4) Twitch Rewards -------------------------------------------------------------------------------------------------------------
 ;
 ;		name:		"string"
-;					Name of your reward as it appears in Twitch
-
-;		type:		game | "sound" | "hotkey"
+;					Name of your reward exactly as it appears on Twitch
+;
+;		type:		game | "globaltrigger"
 ;
 ;					game
 ;					Reward's actions will only trigger while the game is active to prevent unwanted keyboard input
 ;					It's a variable. Set your game's exe under point 3)
 ;					Reward's sound will always trigger
 ;
-;					"sound"
-;					Reward is only a sound. Will always trigger
-;
-;					"hotkey"
-;					Reward's actions and sound will always trigger, meant for broadcasting software hotkeys
+;					"globaltrigger"
+;					Reward's actions and sound will always trigger
+;					Meant for sound rewards and broadcasting software hotkeys
 ;					The according hotkeys have to be set up in your broadcasting software as well
-
-;		sound:		"string"
+;
+;		sound:		"string.mp3"
 ;					Name of the sound file you want to be played
 ;					In some cases, the sound file will not play no matter what. Try saving the file at lower bitrate
 ;					There is no volume control per sound file. Sounds tend to come out too loud
 ;					Either save the sound file at the according volume, or lower the ahk output volume in Windows Volume Mixer
-
+;
 ;		actions:	"{AHK key}" | "Sleep, duration"
 ;					Actions to be performed, in the order given
 ;					List of Keys: https://www.autohotkey.com/docs/KeyList.htm
-;					Modifier keys (^ Ctrl, ! Alt, + Shift) seem to not work right, so send the actual keys individually instead
-;					If a game does not accept a sequence of keys, a short 50ms Sleep between key presses might do the trick
+;					Modifier keys (^ Ctrl, ! Alt, + Shift) tend to not work right, so send the actual keys individually instead
+;					If a sequence of keys is seemingly not accepted, "Sleep, 50" (a 50ms pause) between key presses might help
 
 
 rewards := []
@@ -85,21 +84,22 @@ rewards[0,"type"]	:= game
 rewards[0,"sound"]	:= "yoursoundfile.mp3"
 rewards[0,"actions"]:= [ "{Space}" ]
 
-; Example reward with sound file
-rewards[1,"name"]	:= "Sound Reward"
-rewards[1,"type"]	:= "sound"
-rewards[1,"sound"]	:= "boing.mp3"
-
 ; Example reward with multiple key input in a game (v, short pause, 4)
-rewards[2,"name"]	:= "Another Reward"
-rewards[2,"type"]	:= game
-rewards[2,"actions"]:= [ "{v}", "Sleep, 50", "{4}" ]
+rewards[1,"name"]	:= "Another Reward"
+rewards[1,"type"]	:= game
+rewards[1,"actions"]:= [ "{v}", "Sleep, 50", "{4}" ]
+
+; Example reward with sound file
+rewards[2,"name"]	:= "Sound Reward"
+rewards[2,"type"]	:= "globaltrigger"
+rewards[2,"sound"]	:= "yoursoundfile.mp3"
 
 ; Example reward triggers a sound and a hotkey meant for your broadcasting software
 rewards[3,"name"]	:= "Hotkey Reward"
-rewards[3,"type"]	:= "hotkey"
+rewards[3,"type"]	:= "globaltrigger"
 rewards[3,"sound"]	:= "yoursoundfile.mp3"
 rewards[3,"actions"]:= [ "{Alt down}", "Sleep, 50", "{Numpad7 down}", "Sleep, 50", "{Alt up}", "Sleep, 50", "{Numpad7 up}" ]
+
 
 ; add more rewards by copying one of the above and increasing the number
 
@@ -170,8 +170,8 @@ checkfile:
 					If (reward.actions!="") {
 					
 						; game must be focused, or it's a hotkey for broadcasting software
-						If ((reward.type=game)&&(WinActive("ahk_exe" . game)) or (reward.type="hotkey")) {
-					
+						If (((reward.type=game)&&(WinActive("ahk_exe" . game))) or (reward.type="globaltrigger")) {
+						
 							; cycle through the actions
 							For Each, action in reward.actions {
 							
