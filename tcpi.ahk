@@ -3,8 +3,8 @@
 ; Script Name:		Twitch Channel Points Integration (tcpi)
 ; Description:		Redeeming Channel Points on Twitch sends key input to your game, broadcasting software, or plays a sound file
 ; Filename:			tcpi.ahk
-; Script Version:	v0.5
-; Modified:			2020-02-01
+; Script Version:	v0.7
+; Modified:			2020-06-30
 ; AHK Version:		v1.1.24.01 - August 2, 2016
 ; Author:			Myian <heymyian@gmail.com> <https://twitch.tv/myian>
 ;
@@ -16,6 +16,7 @@
 ;
 ; 		Download AutoHotkey here: https://www.autohotkey.com/ and install.
 ; 		Run this script as administrator. It's now in your system tray.
+;		Script needs to be restarted after midnight (right click on the icon in system tray > Reload This Script)
 ;
 ;
 ; 2) Chatty ---------------------------------------------------------------------------------------------------------------------
@@ -39,6 +40,8 @@
 ;
 		logfolder 		:= "O:\Stream\logs"				; The folder where your log files are stored. Last modified file is used
 		soundfolder 	:= "O:\Stream\soundbits"		; The folder where your sound files are stored
+		ttsfile			:= "O:\Stream\tts.mp3"			; Path where you want your text-to-speech file to sit
+		ttslang			:= "en"							; Text-to-speech language code (en, es, de, nl, ...)
 		game 			:= "PlanetSide2_x64.exe"		; Your game's exe file
 		
 		checktime 		:= 200			; Time in milliseconds until the log file is checked for changes again
@@ -51,7 +54,7 @@
 ;		name:		"string"
 ;					Name of your reward exactly as it appears on Twitch
 ;
-;		type:		game | "globaltrigger"
+;		type:		game | "globaltrigger" | "tts"
 ;
 ;					game
 ;					Reward's actions will only trigger while the game is active to prevent unwanted keyboard input
@@ -63,6 +66,10 @@
 ;					Meant for sound rewards and broadcasting software hotkeys
 ;					The according hotkeys have to be set up in your broadcasting software as well
 ;
+;					"tts"
+;					Text-to-speech
+;					This requires "Viewer to Enter Text" in Twitch
+;
 ;		sound:		"string.mp3"
 ;					Name of the sound file you want to be played
 ;					In some cases, the sound file will not play no matter what. Try saving the file at lower bitrate
@@ -73,35 +80,48 @@
 ;					Actions to be performed, in the order given
 ;					List of Keys: https://www.autohotkey.com/docs/KeyList.htm
 ;					Modifier keys (^ Ctrl, ! Alt, + Shift) tend to not work right, so send the actual keys individually instead
-;					If a sequence of keys is seemingly not accepted, "Sleep, 50" (a 50ms pause) between key presses might help
+;					If a sequence of keys is seemingly not accepted, "Sleep, 50" (50ms pause) between key presses might help
 
 
 rewards := []
 
-; Example reward with sound file and key input in a game (Space bar)
-rewards[0,"name"]	:= "Reward Name"
+rewards[0,"name"]	:= "PS2 :: Granada"
 rewards[0,"type"]	:= game
-rewards[0,"sound"]	:= "yoursoundfile.mp3"
-rewards[0,"actions"]:= [ "{Space}" ]
+rewards[0,"sound"]	:= "granada.mp3"
+rewards[0,"actions"]:= [ "{MButton}" ]
 
-; Example reward with multiple key input in a game (v, short pause, 4)
-rewards[1,"name"]	:= "Another Reward"
+rewards[1,"name"]	:= "PS2 :: Tool Slot"
 rewards[1,"type"]	:= game
-rewards[1,"actions"]:= [ "{v}", "Sleep, 50", "{4}" ]
+rewards[1,"sound"]	:= "boing.mp3"
+rewards[1,"actions"]:= [ "{3}", "Sleep, 1500", "{LButton}" ]
 
-; Example reward with sound file
-rewards[2,"name"]	:= "Sound Reward"
-rewards[2,"type"]	:= "globaltrigger"
-rewards[2,"sound"]	:= "yoursoundfile.mp3"
+rewards[2,"name"]	:= "PS2 :: v5"
+rewards[2,"type"]	:= game
+rewards[2,"actions"]:= [ "{v}", "Sleep, 50", "{5}" ]
 
-; Example reward triggers a sound and a hotkey meant for your broadcasting software
-rewards[3,"name"]	:= "Hotkey Reward"
-rewards[3,"type"]	:= "globaltrigger"
-rewards[3,"sound"]	:= "yoursoundfile.mp3"
-rewards[3,"actions"]:= [ "{Alt down}", "Sleep, 50", "{Numpad7 down}", "Sleep, 50", "{Alt up}", "Sleep, 50", "{Numpad7 up}" ]
+rewards[3,"name"]   := "PS2 :: Instant Action"
+rewards[3,"type"]	:= game
+rewards[3,"actions"]:= [ "!{i}" ]
 
+rewards[4,"name"]	:= "Stream :: Rainbow"
+rewards[4,"type"]	:= "globaltrigger"
+rewards[4,"sound"]	:= "chime.mp3"
+rewards[4,"actions"]:= [ "{Ctrl down}", "Sleep, 50", "{Numpad8 down}", "Sleep, 50", "{Ctrl up}", "Sleep, 50", "{Numpad8 up}"
+						, "Sleep, 10000", "{Ctrl down}", "Sleep, 50", "{Numpad8 down}", "Sleep, 50", "{Ctrl up}", "Sleep, 50", "{Numpad8 up}" ]
+						
+rewards[5,"name"]    := "Stream :: Sad"
+rewards[5,"type"]	:= "globaltrigger"
+rewards[5,"sound"]   := "sad2.mp3"
+rewards[5,"actions"] := [ "{Ctrl down}", "Sleep, 50", "{Numpad7 down}", "Sleep, 50", "{Ctrl up}", "Sleep, 50", "{Numpad7 up}"
+						, "Sleep, 10000", "{Ctrl down}", "Sleep, 50", "{Numpad9 down}", "Sleep, 50", "{Ctrl up}", "Sleep, 50", "{Numpad9 up}" ]
+						
+rewards[6,"name"]    := "PS2 :: F"
+rewards[6,"type"]	:= game
+rewards[6,"sound"]   := "boing.mp3"
+rewards[6,"actions"] := [ "{F}" ]
 
-; add more rewards by copying one of the above and increasing the number
+rewards[7,"name"]	:= "TTS :: Español"
+rewards[7,"type"]	:= "tts"
 
 
 ; ===============================================================================================================================
@@ -152,8 +172,8 @@ checkfile:
 		}
 		
 		; change this line if you use a different timestamp format or a different chat logger altogether
-		; this checks if the 23rd chracter is an opening bracket. look at your chatlog file to understand why
-		If (SubStr(lastline,23,1)="[") {
+		; this checks if the 23rd character is an opening bracket. look at your chatlog file to understand why
+		If (SubStr(lastline,23,2)="[P") {
 
 			; cycle through each reward in the array
 			For Each, reward in rewards {
@@ -163,6 +183,7 @@ checkfile:
 				
 					; in case a sound file is specified, play that.
 					If (reward.sound!="") {
+						;SoundPlay, % soundfolder . "\" . reward.sound, Wait
 						SoundPlay, % soundfolder . "\" . reward.sound
 					}
 				
@@ -187,6 +208,42 @@ checkfile:
 								}
 							}
 						}
+					}
+					
+					; in case the thing is tts
+					If (reward.type=="tts") {
+					
+						tts := lastline
+
+						RegExMatch(tts, "(?<=\)\s\[)([\s\!-\x{00FF}]*)(?=\])", tts)
+						 
+						MsgBox, %tts%
+						tts := UriEncode(tts)
+						MsgBox, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts%
+						 
+						; Modified from http://goo.gl/0a0iJq
+						UriEncode(Uri)
+						{
+							Res := ""
+							VarSetCapacity(Var, StrPut(Uri, "UTF-8"), 0) 
+							StrPut(Uri, &Var, "UTF-8")
+							f := A_FormatInteger
+							SetFormat, IntegerFast, H
+							While Code := NumGet(Var, A_Index - 1, "UChar")
+								If (Code >= 0x30 && Code <= 0x39 ; 0-9
+									|| Code >= 0x41 && Code <= 0x5A ; A-Z
+									|| Code >= 0x61 && Code <= 0x7A ; a-z
+									|| Code == 0x2B) ; +
+									Res .= Chr(Code)
+								Else
+									Res .= "%" . SubStr(Code + 0x100, -1)
+							SetFormat, IntegerFast, %f%
+							Return, Res
+						}
+
+						UrlDownloadToFile, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts%, %ttsfile%
+						Soundplay, %ttsfile%, Wait ; plays the downloaded speech file and waits for it to finish
+					
 					}
 				}
 			}				
