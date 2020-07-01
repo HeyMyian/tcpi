@@ -3,8 +3,8 @@
 ; Script Name:		Twitch Channel Points Integration (tcpi)
 ; Description:		Redeeming Channel Points on Twitch sends key input to your game, broadcasting software, or plays a sound file
 ; Filename:			tcpi.ahk
-; Script Version:	v0.7
-; Modified:			2020-06-30
+; Script Version:	v0.71
+; Modified:			2020-07-01
 ; AHK Version:		v1.1.24.01 - August 2, 2016
 ; Author:			Myian <heymyian@gmail.com> <https://twitch.tv/myian>
 ;
@@ -120,7 +120,7 @@ rewards[6,"type"]	:= game
 rewards[6,"sound"]   := "boing.mp3"
 rewards[6,"actions"] := [ "{F}" ]
 
-rewards[7,"name"]	:= "TTS :: Español"
+rewards[7,"name"]	:= "TTS"
 rewards[7,"type"]	:= "tts"
 
 
@@ -216,10 +216,9 @@ checkfile:
 						tts := lastline
 
 						RegExMatch(tts, "(?<=\)\s\[)([\s\!-\x{00FF}]*)(?=\])", tts)
-						 
-						MsgBox, %tts%
-						tts := UriEncode(tts)
-						MsgBox, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts%
+						;MsgBox, %tts%
+						;tts := UriEncode(tts)
+						;MsgBox, %tts%
 						 
 						; Modified from http://goo.gl/0a0iJq
 						UriEncode(Uri)
