@@ -8,7 +8,7 @@ Redeeming Channel Points with `tcpi.ahk` can do the following things:
 * Play user-entered text-to-speech in your desired language
 
 ## Prerequisites
-* <a href="https://www.autohotkey.com/" target="_blank">AutoHotkey</a> is a free, open-source scripting language, initially aimed at providing keyboard shortcuts or hotkeys. Having AutoHotkey installed is required for the use of `tcpi.ahk`.
+* [AutoHotkey](https://www.autohotkey.com/){:target="_blank"} is a free, open-source scripting language, initially aimed at providing keyboard shortcuts or hotkeys. Having AutoHotkey installed is required for the use of `tcpi.ahk`.
 * [Chatty](https://chatty.github.io/) is a free chat software specifically made for Twitch, in the spirit of a classic IRC client. Chatty's chatlogs are used to parse the Channel Point Redemptions for `tcpi.ahk`.
 
 ## Instructions
