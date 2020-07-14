@@ -22,6 +22,6 @@ Redeeming Channel Points with `tcpi.ahk` can do the following things:
 8. Happy trial & error!
 
 ## Need help?
-Get in touch with Myian on Discord, Twitter, or Twitch.
+Get in touch with Myian on [Discord](https://discord.gg/s5xpCbT), [Twitter](https://twitter.com/HeyMyian), or [Twitch](https://twitch.tv/myian).
 
 
