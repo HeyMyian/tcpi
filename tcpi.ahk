@@ -42,7 +42,7 @@
 		soundfolder 	:= "O:\Stream\soundbits"		; The folder where your sound files are stored
 		ttsfile			:= "O:\Stream\tts.mp3"			; Path where you want your text-to-speech file to sit
 		ttslang			:= "en"							; Text-to-speech language code (en, es, de, nl, ...)
-		game 			:= "PlanetSide2_x64.exe"		; Your game's exe file
+		game 			:= "PlanetSide2_x64.exe"		; Your game's exe file name (not path!)
 		
 		checktime 		:= 200			; Time in milliseconds until the log file is checked for changes again
 										; The script only ever reads the last log line, so keep this number fairly low
