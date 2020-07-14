@@ -4,7 +4,7 @@
 ; Description:		Redeeming Channel Points on Twitch sends key input to your game, broadcasting software, or plays a sound file
 ; Filename:			tcpi.ahk
 ; Script Version:	v0.71
-; Modified:			2020-07-01
+; Modified:			2020-07-14
 ; AHK Version:		v1.1.24.01 - August 2, 2016
 ; Author:			Myian <heymyian@gmail.com> <https://twitch.tv/myian>
 ;
