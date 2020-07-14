@@ -30,7 +30,7 @@
 ;		3. In the column for "Message Types", at least "Chat Info" needs to be selected
 ;		4. Unselect everything else if you don't need chat logs otherwise and want the most lightweight script
 ;		5. Split Logs: Daily (file size might grow too large otherwise. No need to restart at midnight if other option is chosen)
-;		6. Uncheck "Lock files", otherwise AHK can't read the file
+;		6. Uncheck "Lock files", otherwise AutoHotkey can't read the file
 ;		7. Timestamp: [2020-01-26 13:56:33]
 ;
 ;
