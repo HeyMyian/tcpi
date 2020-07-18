@@ -14,7 +14,7 @@ Redeeming Channel Points with `tcpi.ahk` can do the following things:
 ## Instructions
 1. Open the `tcpi.ahk` file in a text editor (like notepad.exe).
 2. Detailed instructions on the use of the script are found inside of the file itself. Reading an AutoHotkey script like this might not be straight-forward, but you will have to edit this file anyway, so bear with it for a moment. For easier reading, please reference the syntax highlighted version on GitHub or [myian.tv](https://myian.tv/tcpi).
-3. Set up AutoHotkey and Chatty as specified in the instructions.
+3. Install AutoHotkey and set up Chatty as specified in the instructions.
 4. Change the variables in the file to match your environment.
 5. Customize your rewards. Refer to the examples given in the file as well as the [AutoHotkey documentation](https://www.autohotkey.com/docs/KeyList.htm) for a list of keys.
 6. Save the file. Make sure the file extension is still `.ahk`. 
