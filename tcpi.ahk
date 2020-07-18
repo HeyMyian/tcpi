@@ -220,8 +220,8 @@ checkfile:
 						; maximum length as per Google Translate for one mp3 is 200 characters
 						; separates the result in groups of max. 200 characters separated by punctuation or whitespace
 						; if there is neither punctuation nor whitespace within 167 characters, the matching fails and there is no output
-						;                (         )(separate after punctuation  |or whitespace       )(repeat x2 )
-						RegExMatch(tts, "(?<=\)\s\[)(.{167,200}(?=[.,?!;\-\""\'])|.{0,200}(?=[\s\/]|]))((?1))((?1))", tts)
+						;                (         )(separate by punctuation |or whitespace       )(repeat x2 )
+						RegExMatch(tts, "(?<=\)\s\[)(.{167,200}(?=[.,?!;\""])|.{0,200}(?=[\s\/]|]))((?1))((?1))", tts)
 						
 						; download the file to the specified path and play it
 						UrlDownloadToFile, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts1%, %ttsfile%
