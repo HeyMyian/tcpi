@@ -3,8 +3,8 @@
 ; Script Name:		Twitch Channel Points Integration (tcpi)
 ; Description:		Redeeming Channel Points on Twitch sends key input to your game, broadcasting software, or plays a sound file
 ; Filename:			tcpi.ahk
-; Script Version:	v0.71
-; Modified:			2020-07-14
+; Script Version:	v0.72
+; Modified:			2020-07-18
 ; AHK Version:		v1.1.24.01 - August 2, 2016
 ; Author:			Myian <heymyian@gmail.com> <https://twitch.tv/myian>
 ;
@@ -215,34 +215,28 @@ checkfile:
 					
 						tts := lastline
 
-						RegExMatch(tts, "(?<=\)\s\[)([\s\!-\x{00FF}]*)(?=\])", tts)
-						;MsgBox, %tts%
-						;tts := UriEncode(tts)
-						;MsgBox, %tts%
-						 
-						; Modified from http://goo.gl/0a0iJq
-						UriEncode(Uri)
-						{
-							Res := ""
-							VarSetCapacity(Var, StrPut(Uri, "UTF-8"), 0) 
-							StrPut(Uri, &Var, "UTF-8")
-							f := A_FormatInteger
-							SetFormat, IntegerFast, H
-							While Code := NumGet(Var, A_Index - 1, "UChar")
-								If (Code >= 0x30 && Code <= 0x39 ; 0-9
-									|| Code >= 0x41 && Code <= 0x5A ; A-Z
-									|| Code >= 0x61 && Code <= 0x7A ; a-z
-									|| Code == 0x2B) ; +
-									Res .= Chr(Code)
-								Else
-									Res .= "%" . SubStr(Code + 0x100, -1)
-							SetFormat, IntegerFast, %f%
-							Return, Res
+						; gets the viewer input after ) [
+						; maximum length as per Twitch for viewer input is 500 characters
+						; maximum length as per Google Translate for one mp3 is 200 characters
+						; separates the result in groups of max. 200 characters separated by punctuation or whitespace
+						; if there is neither punctuation nor whitespace within 167 characters, the matching fails and there is no output
+						;                (         )(separate after punctuation  |or whitespace       )(repeat x2 )
+						RegExMatch(tts, "(?<=\)\s\[)(.{167,200}(?=[.,?!;\-\""\'])|.{0,200}(?=[\s\/]|]))((?1))((?1))", tts)
+						
+						; download the file to the specified path and play it
+						UrlDownloadToFile, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts1%, %ttsfile%
+						Soundplay, %ttsfile%, Wait
+						
+						; if the viewer input is longer than 200 characters, download and play the other parts
+						If (tts2!="") {
+							UrlDownloadToFile, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts2%, %ttsfile%
+							Soundplay, %ttsfile%, Wait
 						}
-
-						UrlDownloadToFile, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts%, %ttsfile%
-						Soundplay, %ttsfile%, Wait ; plays the downloaded speech file and waits for it to finish
-					
+						
+						If (tts3!="") {
+							UrlDownloadToFile, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts3%, %ttsfile%
+							Soundplay, %ttsfile%, Wait
+						}
 					}
 				}
 			}				
