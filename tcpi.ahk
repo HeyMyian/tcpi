@@ -4,7 +4,7 @@
 ; Description:		Redeeming Channel Points on Twitch sends key input to your game, broadcasting software, or plays a sound file
 ; Filename:			tcpi.ahk
 ; Script Version:	v0.73
-; Modified:			2020-07-19
+; Modified:			2020-07-22
 ; AHK Version:		v1.1.24.01 - August 2, 2016
 ; Author:			Myian <heymyian@gmail.com> <https://twitch.tv/myian>
 ;
@@ -221,7 +221,7 @@ checkfile:
 						; separates the result in groups of max. 200 characters separated by punctuation or whitespace
 						; if there is neither punctuation nor whitespace within 167 characters, the matching fails and there is no output
 						;                 (cost)    (separate by punctuation |or whitespace       )(repeat x2 )
-						RegExMatch(tts, "\(\d*\)\s\[(.{167,200}(?=[.,?!;\""])|.{0,200}(?=[\s\/]|]))((?1))((?1))", tts)
+						RegExMatch(tts, "\(\d+\)\s\[(.{167,200}(?=[.,?!;\""])|.{0,200}(?=[\s\/]|]))((?1))((?1))", tts)
 						
 						; download the file to the specified path and play it
 						UrlDownloadToFile, https://translate.google.com/translate_tts?ie=UTF-8&tl=%ttslang%&client=tw-ob&q=%tts1%, %ttsfile%
